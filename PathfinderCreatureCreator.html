@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-1">
+			<div class="form-group">
+				<label for="Str">Strength</label>
+				<input type="number" class="form-control" id="Str" value="10" onchange="updateModifiers();"></input>
+				<label for="Dex">Dexterity</label>
+				<input type="number" class="form-control" id="Dex" value="10" onchange="updateModifiers();"></input>
+				<label for="Con">Constitution</label>
+				<input type="number" class="form-control" id="Con" value="10" onchange="updateModifiers();"></input>
+				<label for="Int">Intelligence</label>
+				<input type="number" class="form-control" id="Int" value="10" onchange="updateModifiers();"></input>
+				<label for="Wis">Wisdom</label>
+				<input type="number" class="form-control" id="Wis" value="10" onchange="updateModifiers();"></input>
+				<label for="Cha">Charisma</label>
+				<input type="number" class="form-control" id="Cha" value="10" onchange="updateModifiers();"></input>
+			</div>
+		</div>
+		<div class="col-md-1">
+			<div class="form-group">
+				<br />
+				<div class="well well-sm" id="StrMod">+ 0</div>
+				<div class="well well-sm" id="DexMod">+ 0</div>
+				<div class="well well-sm" id="ConMod">+ 0</div>
+				<div class="well well-sm" id="IntMod">+ 0</div>
+				<div class="well well-sm" id="WisMod">+ 0</div>
+				<div class="well well-sm" id="ChaMod">+ 0</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="form-group">
+				<label for="creatureType">Creature Type</label>
+				<select class="form-control" id="creatureType">
+					<option value="null">-Select-</option>
+					<option value="Aberration">Aberration</option>
+				</select>
+				
+				<label for="challengeRating">CR</label>
+				<select class="form-control" id="challengeRating">
+					<option value="null">-Select-</option>
+					<option value="half">1/2</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20">20</option>
+				</select>
+				
+				<label for="sizeCategory">Size</label>
+				<select class="form-control" id="sizeCategory">
+					<option value="Fine">Fine</option>
+					<option value="Diminutive">Diminutive</option>
+					<option value="Tiny">Tiny</option>
+					<option value="Small">Small</option>
+					<option value="Medium">Medium</option>
+					<option value="Large">Large</option>
+					<option value="Huge">Huge</option>
+					<option value="Gargantuan">Gargantuan</option>
+					<option value="Colossal">Colossal</option>
+				</select>
+				
+				<div id="Data_Output">
+				</div>
+				
+			</div>
+			<button class="btn btn-default" onclick="$('#Data_Output').html(getResults($('#creatureType').val(), $('#challengeRating').val()));"> Get Creature Information </button>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/users/HBC5540/PathfinderCreatureCreator.js"></script>
+
+<script>
+	var StrMod = 0;
+	var DexMod = 0;
+	var ConMod = 0;
+	var IntMod = 0;
+	var WisMod = 0;
+	var ChaMod = 0;
+
+	function getResults(creatureType, cr){
+		var data = getTypeAttributes(creatureType);
+		var results = '';
+		
+		results += "<b> Type: </b>" + data.Type;
+		
+		results += "<div style='width:100%;font-size:16px;font-weight:bold;border-top:1px solid rgb(0,0,0);border-bottom:1px solid rgb(0,0,0)'>DEFENSE</div>";
+
+		results += "<br />";
+		
+		results += "<b>AC </b>" + (10+DexMod) + ", touch " + (10+DexMod) +", flat-footed " + (10);
+
+		
+		var health = parseInt(data.HitDie.slice(1));
+		var avgHealth = (health/2)+0.5;
+		var addedHealth = 0;
+		if (creatureType == "Undead"){
+			addedHealth = data.CR[cr]*ChaMod;
+		}
+		else{
+			addedHealth = data.CR[cr]*ConMod;
+		}
+		
+		results += "<br />";
+		results += "<b> Health: </b>" + Math.floor(health + ((data.CR[cr]-1)*avgHealth)+addedHealth) + " ("+ data.CR[cr] + data.HitDie + "+" + addedHealth +")";
+		results += "<br />";
+		
+		var fort = 0;
+		if (data.GoodSaves.includes("Fort")){
+			fort = parseInt(Saves.Good[data.CR[cr]])+ConMod;
+		}
+		else {
+			fort = parseInt(Saves.Bad[data.CR[cr]])+ConMod;
+		}
+		
+		results += "<b>Fort </b>+" + fort +", ";
+		
+		var ref = 0;
+		if (data.GoodSaves.includes("Ref")){
+			ref = parseInt(Saves.Good[data.CR[cr]])+DexMod;
+		}
+		else {
+			ref = parseInt(Saves.Bad[data.CR[cr]])+DexMod;
+		}
+		
+		results += "<b>Ref </b>+" + ref +", ";
+		
+		var will = 0;
+		if (data.GoodSaves.includes("Will")){
+			will = parseInt(Saves.Good[data.CR[cr]])+WisMod;
+		}
+		else {
+			will = parseInt(Saves.Bad[data.CR[cr]])+WisMod;
+		}
+		
+		results += "<b>Will </b>+" + will;
+		
+		results += "<br />";
+		results += "<br />";
+		results += "<div style='width:100%;font-size:16px;font-weight:bold;border-top:1px solid rgb(0,0,0);border-bottom:1px solid rgb(0,0,0)'>OFFENSE</div>";
+		results += "<br />";
+		
+		results += "<b>Speed </b> 30 ft.";
+		results += "<br />";
+		results += "<b>Melee </b> trained +" + (Math.floor(BAB[data.BAB]*data.CR[cr])+StrMod);
+		results += "<br />";
+		results += "<b>Ranged </b> trained +" + (Math.floor(BAB[data.BAB]*data.CR[cr])+DexMod);
+		
+		results += "<br />";
+		results += "<br />";
+		results += "<div style='width:100%;font-size:16px;font-weight:bold;border-top:1px solid rgb(0,0,0);border-bottom:1px solid rgb(0,0,0)'>STATISTICS</div>";
+		results += "<br />";
+		
+		results += "<b>Base Atk </b>+" + Math.floor(BAB[data.BAB]*data.CR[cr]) + "; <b>CMB</b> +" + 0 + "; <b>CMD</b> " + 0;
+		results += "<br />";
+		results += "<b>Feats</b> ";
+		results += "<br />";
+		results += "<b> Skill Ranks Per Level: </b>" + (parseInt(data.SkillRanks)+IntMod);
+		results += "<br />";		
+		results += "<b>Class Skills</b> ";
+		results += "<br />";
+		results += "<b>Languages</b> ";
+		
+		return results;
+	}
+	
+	function updateModifiers(){
+		StrMod = Math.floor((($("#Str").val()-10)/2));
+		DexMod = Math.floor((($("#Dex").val()-10)/2));
+		ConMod = Math.floor((($("#Con").val()-10)/2));
+		IntMod = Math.floor((($("#Int").val()-10)/2));
+		WisMod = Math.floor((($("#Wis").val()-10)/2));
+		ChaMod = Math.floor((($("#Cha").val()-10)/2));
+		
+		$("#StrMod").html("+ " + StrMod);
+		$("#DexMod").html("+ " + DexMod);
+		$("#ConMod").html("+ " + ConMod);
+		$("#IntMod").html("+ " + IntMod);
+		$("#WisMod").html("+ " + WisMod);
+		$("#ChaMod").html("+ " + ChaMod);
+	}
+	
+</script>
+
+</body>
+</html>
